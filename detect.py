@@ -48,8 +48,9 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-BACKEND_NODE_DIR = '/home/sameh/Desktop/graduation_project/EHS_system/back/hls/'
-
+# function will start sub proccess depends on FFMPEG to handle YOLO output stream to HLS/RTSP stream
+# call once when intial
+HLS_OUTPUT = '{your_hls_dirictory}/hls/'
 def run_ffmpeg(width, height, fps):
     ffmpg_cmd = [
         'ffmpeg',
@@ -62,7 +63,7 @@ def run_ffmpeg(width, height, fps):
         '-i', '-', 
         '-hls_time', '5',
         '-hls_list_size', '6',
-        '/home/sameh/Desktop/graduation_project/EHS_system/back/hls/index.m3u8'
+        '{HLS_OUTPUT}index.m3u8'
     ]
     return subprocess.Popen(ffmpg_cmd, stdin=subprocess.PIPE)
 
@@ -121,6 +122,7 @@ def run(
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt)
         bs =30   # batch_size
 
+        # call FFMPEG intial function before YOLO start detection (hight ,width,FPS)
         ffmpeg_process = run_ffmpeg( 640,480, 30)
 
     else:
@@ -197,9 +199,10 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            # ffmpeg_process.stdin.write(im0 )
+            #Stream single frame as proccess output to FFMPEG 
+            ffmpeg_process.stdin.write(im0 )
           
-
+            # Noraml YOLO output
             if view_img:
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
@@ -241,10 +244,6 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
-
-
-# sameh  changes  add  ffmpeg  stream
-
 
 def parse_opt():
     parser = argparse.ArgumentParser()
