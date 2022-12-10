@@ -122,7 +122,7 @@ def run(
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt)
         bs =30   # batch_size
 
-        # call FFMPEG intial function before YOLO start detection (hight ,width,FPS)
+        # call FFMPEG proccess intial function before YOLO start detection (hight ,width,FPS)
         ffmpeg_process = run_ffmpeg( 640,480, 30)
 
     else:
